@@ -3,3 +3,16 @@
 .ap-directory-results { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
 .ap-directory-results .portfolio-item img { width:100%; border-radius:6px; }
 .ap-directory-results .portfolio-item h3 { text-align:center; margin-top:0.5em; }
+
+.ap-directory-results .portfolio-item {
+  position: relative;
+  padding-bottom: 1.5em; /* make room for meta */
+}
+
+.ap-meta-date,
+.ap-meta-location {
+  display: block;
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 0.25em;
+}
