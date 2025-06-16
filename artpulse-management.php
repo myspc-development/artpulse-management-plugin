@@ -105,6 +105,9 @@ add_action( 'init', function() {
     \ArtPulse\Core\UserDashboardManager::register();
     \ArtPulse\Core\AnalyticsManager::register();
     \ArtPulse\Core\AnalyticsDashboard::register();
+    // WooCommerce membership purchase integration
+    \ArtPulse\Core\WooCommerceIntegration::register();
+
 
     
     add_filter('template_include', function($template) {
