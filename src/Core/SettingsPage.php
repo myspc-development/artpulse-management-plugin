@@ -5,8 +5,8 @@ class SettingsPage
 {
     public static function register()
     {
-        add_action('admin_menu', [ self::class, 'addMenu' ]);
-        add_action('admin_init', [ self::class, 'registerSettings' ]);
+        add_action('admin_menu',   [ self::class, 'addMenu' ]);
+        add_action('admin_init',   [ self::class, 'registerSettings' ]);
     }
 
     public static function addMenu()
@@ -32,6 +32,7 @@ class SettingsPage
         );
 
         $fields = [
+            // Membership & Stripe
             'basic_fee'              => 'Basic Member Fee ($)',
             'pro_fee'                => 'Pro Artist Fee ($)',
             'org_fee'                => 'Organization Fee ($)',
@@ -43,6 +44,10 @@ class SettingsPage
             'stripe_test'            => 'Stripe Test Mode',
             'woo_enabled'            => 'Enable WooCommerce Integration',
             'notify_fee'             => 'Email Notification on Fee Change',
+
+            // Analytics
+            'analytics_enabled'      => 'Enable Analytics Tracking',
+            'analytics_gtag_id'      => 'Google Analytics 4 Measurement ID (G-XXXXXXX)',
         ];
 
         foreach ($fields as $name => $label) {
@@ -61,7 +66,13 @@ class SettingsPage
     {
         $opts = get_option('artpulse_settings', []);
         $val  = $opts[$args['label_for']] ?? '';
-        $checkboxFields = ['stripe_enabled', 'stripe_test', 'woo_enabled', 'notify_fee'];
+        $checkboxFields = [
+            'stripe_enabled',
+            'stripe_test',
+            'woo_enabled',
+            'notify_fee',
+            'analytics_enabled',  // new
+        ];
 
         if (in_array($args['label_for'], $checkboxFields, true)) {
             printf(
