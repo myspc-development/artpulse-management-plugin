@@ -8,39 +8,58 @@
  * License:         GPL2
  */
 
-// Autoload dependencies via Composer
+// Hide deprecation notices in debug mode so they don’t break admin screens
+if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+    @ini_set( 'display_errors', '0' );
+    @error_reporting( E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED );
+}
+
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
-// Import core classes
-use ArtPulse\Core\PostTypeRegistrar;
-use ArtPulse\Core\MetaBoxRegistrar;
-use ArtPulse\Core\AdminDashboard;
-use ArtPulse\Core\ShortcodeManager;
-use ArtPulse\Core\SettingsPage;
-use ArtPulse\Core\MembershipManager;
-use ArtPulse\Core\AccessControlManager;
-
 /**
- * Runs on plugin activation:
- *  - Creates default options
- *  - Registers CPTs and flushes rewrite rules
- *  - Schedules daily expiry cron
+ * Runs on plugin activation.
  */
 function artpulse_activate() {
-    // Default settings
+    // 1) Default options
     if ( false === get_option( 'artpulse_settings' ) ) {
-        add_option( 'artpulse_settings', [
-            'version' => '0.1.0',
-        ] );
+        add_option( 'artpulse_settings', [ 'version' => '0.1.0' ] );
     }
 
-    // Register CPTs so permalinks work immediately
-    PostTypeRegistrar::register();
+    // 2) Register CPTs so flush_rewrite_rules() picks them up
+    \ArtPulse\Core\PostTypeRegistrar::register();
     flush_rewrite_rules();
 
-    // Schedule daily expiry check
+    // 3) Assign custom capabilities to roles
+    $roles = [ 'administrator', 'editor' ];
+    $caps = [
+        // Events
+        'edit_artpulse_event', 'read_artpulse_event', 'delete_artpulse_event',
+        'edit_artpulse_events', 'edit_others_artpulse_events',
+        'publish_artpulse_events', 'read_private_artpulse_events',
+        // Artists
+        'edit_artpulse_artist', 'read_artpulse_artist', 'delete_artpulse_artist',
+        'edit_artpulse_artists', 'edit_others_artpulse_artists',
+        'publish_artpulse_artists', 'read_private_artpulse_artists',
+        // Artworks
+        'edit_artpulse_artwork', 'read_artpulse_artwork', 'delete_artpulse_artwork',
+        'edit_artpulse_artworks', 'edit_others_artpulse_artworks',
+        'publish_artpulse_artworks', 'read_private_artpulse_artworks',
+        // Organizations
+        'edit_artpulse_org', 'read_artpulse_org', 'delete_artpulse_org',
+        'edit_artpulse_orgs', 'edit_others_artpulse_orgs',
+        'publish_artpulse_orgs', 'read_private_artpulse_orgs',
+    ];
+    foreach ( $roles as $role_name ) {
+        if ( $role = get_role( $role_name ) ) {
+            foreach ( $caps as $cap ) {
+                $role->add_cap( $cap );
+            }
+        }
+    }
+
+    // 4) Schedule daily expiry check
     if ( ! wp_next_scheduled( 'ap_daily_expiry_check' ) ) {
         wp_schedule_event( time(), 'daily', 'ap_daily_expiry_check' );
     }
@@ -48,9 +67,7 @@ function artpulse_activate() {
 register_activation_hook( __FILE__, 'artpulse_activate' );
 
 /**
- * Runs on plugin deactivation:
- *  - Flushes rewrite rules
- *  - Clears scheduled cron
+ * Runs on plugin deactivation.
  */
 function artpulse_deactivate() {
     flush_rewrite_rules();
@@ -58,30 +75,15 @@ function artpulse_deactivate() {
 }
 register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
 
-/**
- * Enqueue frontend assets
- */
-function artpulse_enqueue_assets() {
-    wp_enqueue_style(
-        'artpulse-portfolio',
-        plugins_url( 'assets/css/ap-portfolio.css', __FILE__ ),
-        [],
-        '1.0.0'
-    );
-}
-add_action( 'wp_enqueue_scripts', 'artpulse_enqueue_assets' );
-
-/**
- * Initialize all modules
- */
+// Hook all core modules
 add_action( 'init', function() {
-    PostTypeRegistrar::register();
-    MetaBoxRegistrar::register();
-    AdminDashboard::register();
-    ShortcodeManager::register();
-    SettingsPage::register();
-    MembershipManager::register();
-    AccessControlManager::register();
-    \ArtPulse\Core\UserDashboardManager::register();
+    \ArtPulse\Core\PostTypeRegistrar::register();
+    \ArtPulse\Core\MetaBoxRegistrar::register();
+    \ArtPulse\Core\AdminDashboard::register();
+    \ArtPulse\Core\ShortcodeManager::register();
+    \ArtPulse\Core\SettingsPage::register();
+    \ArtPulse\Core\MembershipManager::register();
+    \ArtPulse\Core\AccessControlManager::register();
     \ArtPulse\Core\DirectoryManager::register();
-} );
+    \ArtPulse\Core\UserDashboardManager::register();
+});
