@@ -46,5 +46,6 @@ register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
 
 add_action('init', function() {
     \ArtPulse\Core\PostTypeRegistrar::register();
+    \ArtPulse\Core\MetaBoxRegistrar::register();
 });
 
