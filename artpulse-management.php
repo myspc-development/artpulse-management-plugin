@@ -75,7 +75,24 @@ function artpulse_deactivate() {
 }
 register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
 
-// Hook all core modules
+
+/**
+ * Use our bundled Salient template for single ArtPulse Events.
+ */
+add_filter( 'single_template', function( $single ) {
+    if ( get_post_type() === 'artpulse_event' ) {
+        $custom = plugin_dir_path( __FILE__ ) . 'templates/salient/content-artpulse_event.php';
+        if ( file_exists( $custom ) ) {
+            return $custom;
+        }
+    }
+    return $single;
+} );
+
+
+/**
+ * Hook all core modules.
+ */
 add_action( 'init', function() {
     \ArtPulse\Core\PostTypeRegistrar::register();
     \ArtPulse\Core\MetaBoxRegistrar::register();

@@ -4,7 +4,8 @@
   "type": "wordpress-plugin",
   "require": {
     "php": "^8.3",
-    "stripe/stripe-php": "^17.3"
+    "stripe/stripe-php": "^17.3",
+    "erusev/parsedown": "^1.7"
   },
   "autoload": {
     "psr-4": {
