@@ -103,4 +103,24 @@ add_action( 'init', function() {
     \ArtPulse\Core\AccessControlManager::register();
     \ArtPulse\Core\DirectoryManager::register();
     \ArtPulse\Core\UserDashboardManager::register();
+    \ArtPulse\Core\AnalyticsManager::register();
+
+    
+    add_filter('template_include', function($template) {
+    $pt = get_post_type();
+    if ( in_array($pt, ['artpulse_event','artpulse_artist','artpulse_artwork','artpulse_org'], true) ) {
+        $slug = str_replace('artpulse_','',$pt);
+        $single = plugin_dir_path(__FILE__)."templates/salient/content-{$pt}.php";
+        $archive = plugin_dir_path(__FILE__)."templates/salient/archive-{$pt}.php";
+        if ( is_singular($pt) && file_exists($single) ) {
+            return $single;
+        }
+        if ( is_post_type_archive($pt) && file_exists($archive) ) {
+            return $archive;
+        }
+    }
+    return $template;
+});
+
+    
 });
