@@ -14,6 +14,7 @@ class UserDashboardManager
 
     public static function enqueueAssets()
     {
+        // Core dashboard script
         wp_enqueue_script(
             'ap-user-dashboard-js',
             plugins_url('assets/js/ap-user-dashboard.js', __FILE__),
@@ -21,10 +22,23 @@ class UserDashboardManager
             '1.0.0',
             true
         );
+
+        // Analytics events
+        wp_enqueue_script(
+            'ap-analytics-js',
+            plugins_url('assets/js/ap-analytics.js', __FILE__),
+            ['ap-user-dashboard-js'],
+            '1.0.0',
+            true
+        );
+
+        // Localize dashboard REST endpoint
         wp_localize_script('ap-user-dashboard-js', 'ArtPulseDashboardApi', [
             'root'  => esc_url_raw(rest_url()),
             'nonce' => wp_create_nonce('wp_rest'),
         ]);
+
+        // Dashboard styles
         wp_enqueue_style(
             'ap-user-dashboard-css',
             plugins_url('assets/css/ap-user-dashboard.css', __FILE__),
@@ -36,8 +50,8 @@ class UserDashboardManager
     public static function registerRestRoutes()
     {
         register_rest_route('artpulse/v1', '/user/dashboard', [
-            'methods'  => 'GET',
-            'callback' => [ self::class, 'getDashboardData' ],
+            'methods'             => 'GET',
+            'callback'            => [ self::class, 'getDashboardData' ],
             'permission_callback' => function() {
                 return is_user_logged_in();
             },
@@ -58,15 +72,14 @@ class UserDashboardManager
         $data = [
             'membership_level'   => get_user_meta($user_id, 'ap_membership_level', true),
             'membership_expires' => get_user_meta($user_id, 'ap_membership_expires', true),
-            'events'   => [],
-            'artists'  => [],
-            'artworks' => [],
+            'events'             => [],
+            'artists'            => [],
+            'artworks'           => [],
         ];
 
-        // Fetch user's CPT items
-        foreach ( ['event', 'artist', 'artwork'] as $type ) {
+        foreach ( ['event','artist','artwork'] as $type ) {
             $posts = get_posts([
-                'post_type'      => 'artpulse_' . $type,
+                'post_type'      => "artpulse_{$type}",
                 'author'         => $user_id,
                 'posts_per_page' => -1,
             ]);
@@ -102,9 +115,9 @@ class UserDashboardManager
         }
         ob_start(); ?>
         <div class="ap-user-dashboard">
-            <h2><?php _e('Your Membership', 'artpulse'); ?></h2>
+            <h2><?php _e('Your Membership','artpulse'); ?></h2>
             <div id="ap-membership-info"></div>
-            <h2><?php _e('Your Content', 'artpulse'); ?></h2>
+            <h2><?php _e('Your Content','artpulse'); ?></h2>
             <div id="ap-user-content"></div>
         </div>
         <?php
