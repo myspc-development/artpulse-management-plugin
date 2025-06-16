@@ -11,6 +11,7 @@ class DirectoryManager {
     }
 
     public static function enqueueAssets() {
+        // Directory functionality
         wp_enqueue_script(
             'ap-directory-js',
             plugins_url('assets/js/ap-directory.js', __FILE__),
@@ -18,10 +19,20 @@ class DirectoryManager {
             '1.0.0',
             true
         );
+        // Analytics events
+        wp_enqueue_script(
+            'ap-analytics-js',
+            plugins_url('assets/js/ap-analytics.js', __FILE__),
+            ['ap-directory-js'],
+            '1.0.0',
+            true
+        );
         wp_localize_script('ap-directory-js', 'ArtPulseApi', [
             'root'  => esc_url_raw(rest_url()),
             'nonce' => wp_create_nonce('wp_rest'),
         ]);
+
+        // Directory styles
         wp_enqueue_style(
             'ap-directory-css',
             plugins_url('assets/css/ap-directory.css', __FILE__),
@@ -61,8 +72,8 @@ class DirectoryManager {
                 $item['date']     = get_post_meta($p->ID, '_ap_event_date', true);
                 $item['location'] = get_post_meta($p->ID, '_ap_event_location', true);
             } elseif ($type === 'artist') {
-                $item['bio']       = get_post_meta($p->ID, '_ap_artist_bio', true);
-                $item['org_id']    = (int) get_post_meta($p->ID, '_ap_artist_org', true);
+                $item['bio']    = get_post_meta($p->ID, '_ap_artist_bio', true);
+                $item['org_id'] = (int) get_post_meta($p->ID, '_ap_artist_org', true);
             } elseif ($type === 'artwork') {
                 $item['medium']     = get_post_meta($p->ID, '_ap_artwork_medium', true);
                 $item['dimensions'] = get_post_meta($p->ID, '_ap_artwork_dimensions', true);
