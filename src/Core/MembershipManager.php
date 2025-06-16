@@ -18,7 +18,7 @@ class MembershipManager
         // Register Stripe webhook endpoint
         add_action('rest_api_init', [ self::class, 'registerRestRoutes' ]);
 
-        // Schedule daily expiry checks
+        // Schedule daily expiry checks and notifications
         add_action('ap_daily_expiry_check', [ self::class, 'processExpirations' ]);
     }
 
@@ -30,6 +30,13 @@ class MembershipManager
         $user = get_userdata($user_id);
         $user->set_role('subscriber');
         update_user_meta($user_id, 'ap_membership_level', 'Free');
+
+        // Optional: send welcome email
+        wp_mail(
+            $user->user_email,
+            __('Welcome to ArtPulse – Free Membership','artpulse'),
+            __('Thanks for joining! You now have Free membership.','artpulse')
+        );
     }
 
     /**
@@ -62,25 +69,77 @@ class MembershipManager
             return new WP_Error('invalid_signature', 'Invalid signature', ['status' => 400]);
         }
 
+        // Stripe client for retrieving full objects if needed
+        $stripe = new StripeClient($settings['stripe_secret'] ?? '');
+
         switch ($event->type) {
+
+            // Initial checkout session → customer created
             case 'checkout.session.completed':
-                $session    = $event->data->object;
-                $user_id    = isset($session->client_reference_id) ? absint($session->client_reference_id) : 0;
+                $session = $event->data->object;
+                $user_id = absint($session->client_reference_id ?? 0);
                 if ($user_id) {
-                    // Store Stripe customer ID
+                    // record customer ID and set Pro for one month
                     update_user_meta($user_id, 'stripe_customer_id', sanitize_text_field($session->customer));
-                    // Upgrade to Pro
                     update_user_meta($user_id, 'ap_membership_level', 'Pro');
-                    // Set expiry one month from now
                     $expiry = strtotime('+1 month', current_time('timestamp'));
                     update_user_meta($user_id, 'ap_membership_expires', $expiry);
                 }
                 break;
 
-            // TODO: handle subscription renewals, cancellations, etc.
+            // Subscription created or renewed
+            case 'customer.subscription.created':
+            case 'invoice.payment_succeeded':
+                $sub = $event->data->object;
+                $custId = $sub->customer;
+                // find user by stripe_customer_id
+                $user = get_users([
+                    'meta_key'   => 'stripe_customer_id',
+                    'meta_value' => $custId,
+                    'number'     => 1,
+                    'fields'     => 'ID',
+                ]);
+                if (!empty($user)) {
+                    $user_id = $user[0];
+                    update_user_meta($user_id, 'ap_membership_level', 'Pro');
+                    // Stripe sends current_period_end timestamp
+                    $expiry = intval($sub->current_period_end);
+                    update_user_meta($user_id, 'ap_membership_expires', $expiry);
+                }
+                break;
+
+            // Subscription cancelled or payment failed → downgrade immediately
+            case 'customer.subscription.deleted':
+            case 'invoice.payment_failed':
+                $obj = $event->data->object;
+                $custId = $obj->customer;
+                $user = get_users([
+                    'meta_key'   => 'stripe_customer_id',
+                    'meta_value' => $custId,
+                    'number'     => 1,
+                    'fields'     => 'ID',
+                ]);
+                if (!empty($user)) {
+                    $user_id = $user[0];
+                    // downgrade
+                    $usr = get_userdata($user_id);
+                    $usr->set_role('subscriber');
+                    update_user_meta($user_id, 'ap_membership_level', 'Free');
+                    update_user_meta($user_id, 'ap_membership_expires', current_time('timestamp'));
+
+                    // notify user
+                    wp_mail(
+                        $usr->user_email,
+                        __('Your ArtPulse membership has been cancelled','artpulse'),
+                        __('Your subscription has ended or payment failed. You are now on Free membership.','artpulse')
+                    );
+                }
+                break;
+
+            // Add other event types here…
 
             default:
-                // We’re not handling other events right now
+                // do nothing
                 break;
         }
 
@@ -89,20 +148,27 @@ class MembershipManager
 
     /**
      * Demote any users whose membership has expired.
+     * Runs daily via cron.
      */
     public static function processExpirations()
     {
-        $today = current_time('timestamp');
-        $expired_users = get_users([
+        $now = current_time('timestamp');
+        $expired = get_users([
             'meta_key'     => 'ap_membership_expires',
-            'meta_value'   => $today,
+            'meta_value'   => $now,
             'meta_compare' => '<=',
         ]);
 
-        foreach ($expired_users as $user) {
+        foreach ($expired as $user) {
             $user->set_role('subscriber');
             update_user_meta($user->ID, 'ap_membership_level', 'Free');
-            // optionally notify via email here
+
+            // Optionally notify
+            wp_mail(
+                $user->user_email,
+                __('Your ArtPulse membership has expired','artpulse'),
+                __('Your Pro membership has expired and you have been moved to Free level.','artpulse')
+            );
         }
     }
 }
