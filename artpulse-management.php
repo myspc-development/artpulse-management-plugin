@@ -14,6 +14,7 @@ if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
     @error_reporting( E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED );
 }
 
+// Load Composer autoloader
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
@@ -27,11 +28,11 @@ function artpulse_activate() {
         add_option( 'artpulse_settings', [ 'version' => '0.1.0' ] );
     }
 
-    // 2) Register CPTs so flush_rewrite_rules() picks them up
+    // 2) Register CPTs and flush rewrite rules
     \ArtPulse\Core\PostTypeRegistrar::register();
     flush_rewrite_rules();
 
-    // 3) Assign custom capabilities to roles
+    // 3) Assign custom capabilities
     $roles = [ 'administrator', 'editor' ];
     $caps = [
         // Events
@@ -75,23 +76,33 @@ function artpulse_deactivate() {
 }
 register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
 
-
 /**
- * Use our bundled Salient template for single ArtPulse Events.
+ * Use our bundled Salient templates for all ArtPulse CPTs.
  */
-add_filter( 'single_template', function( $single ) {
-    if ( get_post_type() === 'artpulse_event' ) {
-        $custom = plugin_dir_path( __FILE__ ) . 'templates/salient/content-artpulse_event.php';
-        if ( file_exists( $custom ) ) {
-            return $custom;
+add_filter( 'template_include', function( $template ) {
+    $pt = get_post_type();
+    $cpts = [
+        'artpulse_event',
+        'artpulse_artist',
+        'artpulse_artwork',
+        'artpulse_org',
+    ];
+    if ( in_array( $pt, $cpts, true ) ) {
+        $single = plugin_dir_path( __FILE__ ) . "templates/salient/content-{$pt}.php";
+        $archive = plugin_dir_path( __FILE__ ) . "templates/salient/archive-{$pt}.php";
+
+        if ( is_singular( $pt ) && file_exists( $single ) ) {
+            return $single;
+        }
+        if ( is_post_type_archive( $pt ) && file_exists( $archive ) ) {
+            return $archive;
         }
     }
-    return $single;
+    return $template;
 } );
 
-
 /**
- * Hook all core modules.
+ * Hook all core modules on init.
  */
 add_action( 'init', function() {
     \ArtPulse\Core\PostTypeRegistrar::register();
@@ -105,26 +116,10 @@ add_action( 'init', function() {
     \ArtPulse\Core\UserDashboardManager::register();
     \ArtPulse\Core\AnalyticsManager::register();
     \ArtPulse\Core\AnalyticsDashboard::register();
-    // WooCommerce membership purchase integration
+} );
+
+// Conditionally register WooCommerce integration if enabled
+$opts = get_option( 'artpulse_settings', [] );
+if ( ! empty( $opts['woo_enabled'] ) ) {
     \ArtPulse\Core\WooCommerceIntegration::register();
-
-
-    
-    add_filter('template_include', function($template) {
-    $pt = get_post_type();
-    if ( in_array($pt, ['artpulse_event','artpulse_artist','artpulse_artwork','artpulse_org'], true) ) {
-        $slug = str_replace('artpulse_','',$pt);
-        $single = plugin_dir_path(__FILE__)."templates/salient/content-{$pt}.php";
-        $archive = plugin_dir_path(__FILE__)."templates/salient/archive-{$pt}.php";
-        if ( is_singular($pt) && file_exists($single) ) {
-            return $single;
-        }
-        if ( is_post_type_archive($pt) && file_exists($archive) ) {
-            return $archive;
-        }
-    }
-    return $template;
-});
-
-    
-});
+}
