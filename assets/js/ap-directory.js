@@ -8,6 +8,8 @@
     const applyBtn   = container.querySelector('.ap-filter-apply');
     const selectEl   = container.querySelector('.ap-filter-event-type');
 
+    if (!results || !limitInput || !applyBtn) return; // Safety check
+
     // Load Event Type terms if needed
     if ( selectEl ) {
       wp.apiFetch({ path: '/wp/v2/artpulse_event_type' })
@@ -19,11 +21,20 @@
             o.textContent = t.name;
             selectEl.appendChild(o);
           });
+        })
+        .catch(() => {
+          selectEl.innerHTML = '<option value="">(Failed to load)</option>';
         });
     }
 
-    // Core data‐loading function
+    // Show spinner during loading
+    function showLoading() {
+      results.innerHTML = '<div class="ap-loading">Loading...</div>';
+    }
+
+    // Core data-loading function
     function loadData() {
+      showLoading();
       const params = new URLSearchParams({
         type,
         limit: limitInput.value
@@ -35,13 +46,17 @@
       wp.apiFetch({ path: '/artpulse/v1/filter?' + params.toString() })
         .then(posts => {
           results.innerHTML = '';
+          if (!posts.length) {
+            results.innerHTML = '<div class="ap-empty">No results found.</div>';
+            return;
+          }
           posts.forEach(post => {
             const div = document.createElement('div');
             div.className = 'portfolio-item';
 
             let html = `
               <a href="${post.link}">
-                <img src="${post.featured_media_url}" alt="${post.title}" />
+                <img src="${post.featured_media_url || ''}" alt="${post.title}" />
                 <h3>${post.title}</h3>
             `;
             if ( post.date ) {
@@ -60,11 +75,39 @@
           container.dispatchEvent(new CustomEvent('ap:loaded', {
             detail: { type, limit: limitInput.value }
           }));
+        })
+        .catch(() => {
+          results.innerHTML = '<div class="ap-error">Failed to load directory. Please try again.</div>';
         });
     }
 
+    // For each post result, add a follow button:
+function createFollowButton(post, objectType) {
+    const btn = document.createElement('button');
+    btn.textContent = post.is_following ? 'Unfollow' : 'Follow';
+    btn.className = 'ap-follow-btn';
+    btn.addEventListener('click', function(e){
+        e.preventDefault();
+        wp.apiFetch({
+            path: '/artpulse/v1/follow',
+            method: 'POST',
+            data: {
+                object_id: post.id,
+                object_type: objectType,
+                action: post.is_following ? 'unfollow' : 'follow'
+            }
+        }).then(resp => {
+            btn.textContent = resp.following ? 'Unfollow' : 'Follow';
+            post.is_following = resp.following;
+        });
+    });
+    return btn;
+}
+
+
     // Bind Apply button once
-    applyBtn.addEventListener('click', () => {
+    applyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       loadData();
       container.dispatchEvent(new CustomEvent('ap:filter_applied', {
         detail: {

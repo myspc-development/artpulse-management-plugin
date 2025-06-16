@@ -11,18 +11,16 @@ class DirectoryManager {
     }
 
     public static function enqueueAssets() {
-        // Directory functionality
         wp_enqueue_script(
             'ap-directory-js',
-            plugins_url('assets/js/ap-directory.js', __FILE__),
+            plugins_url('assets/js/ap-directory.js', dirname(__DIR__, 2)), // robust plugin URL
             ['wp-api-fetch'],
             '1.0.0',
             true
         );
-        // Analytics events
         wp_enqueue_script(
             'ap-analytics-js',
-            plugins_url('assets/js/ap-analytics.js', __FILE__),
+            plugins_url('assets/js/ap-analytics.js', dirname(__DIR__, 2)),
             ['ap-directory-js'],
             '1.0.0',
             true
@@ -31,11 +29,9 @@ class DirectoryManager {
             'root'  => esc_url_raw(rest_url()),
             'nonce' => wp_create_nonce('wp_rest'),
         ]);
-
-        // Directory styles
         wp_enqueue_style(
             'ap-directory-css',
-            plugins_url('assets/css/ap-directory.css', __FILE__),
+            plugins_url('assets/css/ap-directory.css', dirname(__DIR__, 2)),
             [],
             '1.0.0'
         );
@@ -46,6 +42,11 @@ class DirectoryManager {
             'methods'             => 'GET',
             'callback'            => [ self::class, 'handleFilter' ],
             'permission_callback' => '__return_true',
+            'args' => [
+                'type' => [ 'type' => 'string', 'required' => true ],
+                'limit'=> [ 'type' => 'integer', 'default' => 10 ],
+                // Add other filter args here (e.g. search, tag, org)
+            ]
         ]);
     }
 
@@ -53,10 +54,18 @@ class DirectoryManager {
         $type  = sanitize_text_field( $request->get_param('type') );
         $limit = intval( $request->get_param('limit') ?? 10 );
 
+        $allowed = ['event', 'artist', 'artwork', 'org'];
+        if (!in_array($type, $allowed, true)) {
+            return new \WP_Error('invalid_type', 'Invalid directory type', [ 'status' => 400 ]);
+        }
+
         $args = [
             'post_type'      => 'artpulse_' . $type,
             'posts_per_page' => $limit,
         ];
+
+        // Optional: add more filter/sort args here
+
         $posts = get_posts($args);
 
         $data = array_map(function($p) use ($type) {
@@ -66,8 +75,7 @@ class DirectoryManager {
                 'link'    => get_permalink($p),
                 'featured_media_url' => get_the_post_thumbnail_url($p, 'medium'),
             ];
-
-            // Pull in meta fields per type
+            // Meta fields per type
             if ($type === 'event') {
                 $item['date']     = get_post_meta($p->ID, '_ap_event_date', true);
                 $item['location'] = get_post_meta($p->ID, '_ap_event_location', true);
@@ -82,7 +90,6 @@ class DirectoryManager {
                 $item['address'] = get_post_meta($p->ID, '_ap_org_address', true);
                 $item['website'] = get_post_meta($p->ID, '_ap_org_website', true);
             }
-
             return $item;
         }, $posts);
 
