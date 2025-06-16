@@ -1,4 +1,6 @@
 <?php
+use ArtPulseCoreAdminDashboard;
+use ArtPulseCoreShortcodeManager;
 /**
  * Plugin Name:     ArtPulse Management
  * Description:     Management plugin for ArtPulse.
@@ -9,7 +11,11 @@
  */
 
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+use ArtPulseCoreAdminDashboard;
+use ArtPulseCoreShortcodeManager;
     require_once __DIR__ . '/vendor/autoload.php';
+use ArtPulseCoreAdminDashboard;
+use ArtPulseCoreShortcodeManager;
 }
 
 /**
@@ -45,6 +51,8 @@ register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
 add_action( 'init', function() {
     \ArtPulse\Core\PostTypeRegistrar::register();
     \ArtPulse\Core\MetaBoxRegistrar::register();        // Phase 2.1
+    AdminDashboard::register();
+    ShortcodeManager::register();
     \ArtPulse\Core\SettingsPage::register();            // Phase 3
     \ArtPulse\Core\MembershipManager::register();       // Phase 3
     \ArtPulse\Core\AccessControlManager::register();    // Phase 3
