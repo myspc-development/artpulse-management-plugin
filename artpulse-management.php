@@ -82,5 +82,6 @@ add_action( 'init', function() {
     SettingsPage::register();
     MembershipManager::register();
     AccessControlManager::register();
+    \ArtPulse\Core\UserDashboardManager::register();
     \ArtPulse\Core\DirectoryManager::register();
 } );
