@@ -43,3 +43,8 @@ function artpulse_deactivate() {
     flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
+
+add_action('init', function() {
+    \ArtPulse\Core\PostTypeRegistrar::register();
+});
+
