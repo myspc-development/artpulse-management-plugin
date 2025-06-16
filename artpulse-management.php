@@ -80,17 +80,11 @@ register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
  * Use our bundled Salient templates for all ArtPulse CPTs.
  */
 add_filter( 'template_include', function( $template ) {
-    $pt = get_post_type();
-    $cpts = [
-        'artpulse_event',
-        'artpulse_artist',
-        'artpulse_artwork',
-        'artpulse_org',
-    ];
+    $pt   = get_post_type();
+    $cpts = [ 'artpulse_event', 'artpulse_artist', 'artpulse_artwork', 'artpulse_org' ];
     if ( in_array( $pt, $cpts, true ) ) {
-        $single = plugin_dir_path( __FILE__ ) . "templates/salient/content-{$pt}.php";
+        $single  = plugin_dir_path( __FILE__ ) . "templates/salient/content-{$pt}.php";
         $archive = plugin_dir_path( __FILE__ ) . "templates/salient/archive-{$pt}.php";
-
         if ( is_singular( $pt ) && file_exists( $single ) ) {
             return $single;
         }
@@ -116,10 +110,11 @@ add_action( 'init', function() {
     \ArtPulse\Core\UserDashboardManager::register();
     \ArtPulse\Core\AnalyticsManager::register();
     \ArtPulse\Core\AnalyticsDashboard::register();
-} );
 
-// Conditionally register WooCommerce integration if enabled
-$opts = get_option( 'artpulse_settings', [] );
-if ( ! empty( $opts['woo_enabled'] ) ) {
-    \ArtPulse\Core\WooCommerceIntegration::register();
-}
+    // Purchase shortcode is only useful when WooCommerce integration is on
+    $opts = get_option( 'artpulse_settings', [] );
+    if ( ! empty( $opts['woo_enabled'] ) ) {
+        \ArtPulse\Core\WooCommerceIntegration::register();
+        \ArtPulse\Core\PurchaseShortcode::register();
+    }
+} );
