@@ -1,6 +1,8 @@
 <?php
 namespace ArtPulse\Core;
 
+use WP_REST_Request;
+
 class UserDashboardManager
 {
     public static function register()
@@ -50,26 +52,26 @@ class UserDashboardManager
         ]);
     }
 
-    public static function getDashboardData(\WP_REST_Request $request)
+    public static function getDashboardData(WP_REST_Request $request)
     {
         $user_id = get_current_user_id();
         $data = [
-            'membership_level'  => get_user_meta($user_id, 'ap_membership_level', true),
-            'membership_expires'=> get_user_meta($user_id, 'ap_membership_expires', true),
-            'events' => [],
-            'artists'=> [],
-            'artworks'=> [],
+            'membership_level'   => get_user_meta($user_id, 'ap_membership_level', true),
+            'membership_expires' => get_user_meta($user_id, 'ap_membership_expires', true),
+            'events'   => [],
+            'artists'  => [],
+            'artworks' => [],
         ];
 
-        // Fetch user’s CPT items
-        foreach ( ['event','artist','artwork'] as $type ) {
+        // Fetch user's CPT items
+        foreach ( ['event', 'artist', 'artwork'] as $type ) {
             $posts = get_posts([
-                'post_type'      => \"artpulse_\$type\",
+                'post_type'      => 'artpulse_' . $type,
                 'author'         => $user_id,
                 'posts_per_page' => -1,
             ]);
             foreach ( $posts as $p ) {
-                $data[\$type . 's'][] = [
+                $data[$type . 's'][] = [
                     'id'    => $p->ID,
                     'title' => $p->post_title,
                     'link'  => get_permalink($p),
@@ -80,14 +82,16 @@ class UserDashboardManager
         return rest_ensure_response($data);
     }
 
-    public static function updateProfile(\WP_REST_Request $request)
+    public static function updateProfile(WP_REST_Request $request)
     {
         $user_id = get_current_user_id();
         $params  = $request->get_json_params();
         if ( isset($params['display_name']) ) {
-            wp_update_user([ 'ID' => $user_id, 'display_name' => sanitize_text_field($params['display_name']) ]);
+            wp_update_user([
+                'ID'           => $user_id,
+                'display_name' => sanitize_text_field($params['display_name']),
+            ]);
         }
-        // Add more profile fields here...
         return rest_ensure_response([ 'success' => true ]);
     }
 
@@ -98,9 +102,9 @@ class UserDashboardManager
         }
         ob_start(); ?>
         <div class="ap-user-dashboard">
-            <h2><?php _e('Your Membership','artpulse'); ?></h2>
+            <h2><?php _e('Your Membership', 'artpulse'); ?></h2>
             <div id="ap-membership-info"></div>
-            <h2><?php _e('Your Content','artpulse'); ?></h2>
+            <h2><?php _e('Your Content', 'artpulse'); ?></h2>
             <div id="ap-user-content"></div>
         </div>
         <?php
