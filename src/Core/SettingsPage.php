@@ -45,9 +45,18 @@ class SettingsPage
             'woo_enabled'            => 'Enable WooCommerce Integration',
             'notify_fee'             => 'Email Notification on Fee Change',
 
+            // WooCommerce Membership Products
+            'woo_basic_product_id'   => 'Product ID for Basic Membership',
+            'woo_pro_product_id'     => 'Product ID for Pro Membership',
+            'woo_org_product_id'     => 'Product ID for Organization Membership',
+
             // Analytics
             'analytics_enabled'      => 'Enable Analytics Tracking',
             'analytics_gtag_id'      => 'Google Analytics 4 Measurement ID (G-XXXXXXX)',
+
+            // Analytics Dashboard Embed
+            'analytics_embed_enabled'=> 'Enable Analytics Dashboard Embed',
+            'analytics_embed_url'    => 'Analytics Dashboard Embed URL',
         ];
 
         foreach ($fields as $name => $label) {
@@ -71,7 +80,8 @@ class SettingsPage
             'stripe_test',
             'woo_enabled',
             'notify_fee',
-            'analytics_enabled',  // new
+            'analytics_enabled',
+            'analytics_embed_enabled',
         ];
 
         if (in_array($args['label_for'], $checkboxFields, true)) {
