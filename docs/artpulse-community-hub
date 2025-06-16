@@ -1,0 +1,137 @@
+ArtPulse Management Plugin — Feature Implementation Guide
+
+This document outlines implementation strategies and steps for the newly added features in the updated ArtPulse development roadmap. These steps complement the existing development plan and aim to turn ArtPulse into a robust, scalable community hub.
+
+Repository Name Recommendation
+
+GitHub Repository Name: artpulse-community-hub
+
+This reflects the broader mission of ArtPulse beyond management alone — supporting an interactive, artist- and organization-driven ecosystem.
+
+G. Organizational Experience
+
+Org Admin Dashboard Enhancements
+
+Dashboard Page: Use add_submenu_page() for a new tab under Organizations.
+
+Widgets: Query linked artists/artworks using meta_query. Show previews, stats.
+
+Billing History: Store org payment logs in post meta or a custom table. Sync with Stripe.
+
+Org Analytics: Use GA4 + post meta counters. Display charts with chart.js.
+
+H. Community & Engagement
+
+Favorites & Follows
+
+DB Table: wp_ap_favorites (user_id, object_id, type, date).
+
+API: POST /artpulse/v1/favorite, GET /favorites?user=ID.
+
+UI: Heart icon on artworks/events. Filter by favorited content.
+
+User Dashboard: Tab for "My Favorites" using [ap_user_dashboard] or a new block.
+
+Profile Linking Requests
+
+Data: Custom CPT profile_link_request or use post meta.
+
+UI: Artists send request. Org admins approve/reject.
+
+Notifications: Emails to org admins; role updates on approval.
+
+I. Monetization Expansion
+
+Pay-per-Feature Unlocks
+
+Flags: Use user/org meta (e.g., extra_artworks, promoted_listing).
+
+Stripe Checkout: One-time purchase flow using defined product IDs.
+
+Enforcement: Check usage caps before saving post or promotion.
+
+Auto-Renewal Toggle
+
+UI: Checkbox in [ap_membership_account] or settings page.
+
+Stripe: Update sub with cancel_at_period_end.
+
+Email Reminder: Scheduled via wp_cron 5-7 days before renewal.
+
+Paid Member Analytics
+
+Views: Store view count in post meta or GA4.
+
+Dashboard: Chart views, engagement per content item. REST + React UI.
+
+Offline Access
+
+Strategy
+
+Service Worker: Add using workbox-webpack-plugin.
+
+Cache: REST endpoints, assets, key images.
+
+Fallback UI: Offline banner and pre-cached content.
+
+Guided Onboarding Flow
+
+Onboarding Modal
+
+Trigger: On first login (check user_meta['onboarded']).
+
+Steps: Avatar, bio, link org, choose tags.
+
+Profile Progress Tracker
+
+Meter: Display completion % based on filled profile fields.
+
+Incentive: CTA to finish setup, disable banner when 100%.
+
+Contextual Help System
+
+Admin & Member Views
+
+HelpManager Class: Register screen-based tips.
+
+Sidebar/Tab: For Gutenberg/React UIs, use wp.components.PanelBody.
+
+Content Source: Load Markdown from docs/help/ or use static HTML.
+
+Tools & Dependencies
+
+Feature
+
+Tool / Plugin
+
+REST caching
+
+Transients, md5(serialize())
+
+Offline access
+
+Workbox, SW caching
+
+Chart rendering
+
+chart.js, Recharts
+
+Stripe
+
+PHP SDK, Checkout Sessions
+
+DB ops
+
+$wpdb or CPT/meta
+
+Block UI
+
+wp.components, @wordpress/scripts
+
+Testing
+
+PHPUnit, BrainMonkey
+
+Add these feature modules in your codebase with test coverage and frontend UX guidelines. Each feature should pass accessibility and mobile usability checks.
+
+Ask for component boilerplates or CI additions as needed.

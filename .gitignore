@@ -1,1 +1,29 @@
-/vendor/
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log
+
+# Build output
+dist/
+build/
+
+# IDEs and OS
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# PHPUnit
+.phpunit.result.cache
+
+# Vendor if using Composer (optional, if installed server-side)
+vendor/
+
+# Env & config
+.env
+.env.local
+.env.*.local
