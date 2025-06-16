@@ -1,0 +1,5 @@
+.ap-directory { margin-bottom: 2em; }
+.ap-directory-filters { display:flex; gap:10px; margin-bottom:1em; align-items:center; }
+.ap-directory-results { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
+.ap-directory-results .portfolio-item img { width:100%; border-radius:6px; }
+.ap-directory-results .portfolio-item h3 { text-align:center; margin-top:0.5em; }
