@@ -1,6 +1,4 @@
 <?php
-use ArtPulseCoreAdminDashboard;
-use ArtPulseCoreShortcodeManager;
 /**
  * Plugin Name:     ArtPulse Management
  * Description:     Management plugin for ArtPulse.
@@ -10,28 +8,39 @@ use ArtPulseCoreShortcodeManager;
  * License:         GPL2
  */
 
+// Autoload dependencies via Composer
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-use ArtPulseCoreAdminDashboard;
-use ArtPulseCoreShortcodeManager;
     require_once __DIR__ . '/vendor/autoload.php';
-use ArtPulseCoreAdminDashboard;
-use ArtPulseCoreShortcodeManager;
 }
 
+// Import core classes
+use ArtPulse\Core\PostTypeRegistrar;
+use ArtPulse\Core\MetaBoxRegistrar;
+use ArtPulse\Core\AdminDashboard;
+use ArtPulse\Core\ShortcodeManager;
+use ArtPulse\Core\SettingsPage;
+use ArtPulse\Core\MembershipManager;
+use ArtPulse\Core\AccessControlManager;
+
 /**
- * Runs on plugin activation.
+ * Runs on plugin activation:
+ *  - Creates default options
+ *  - Registers CPTs and flushes rewrite rules
+ *  - Schedules daily expiry cron
  */
 function artpulse_activate() {
-    // Default options
+    // Default settings
     if ( false === get_option( 'artpulse_settings' ) ) {
-        add_option( 'artpulse_settings', [ 'version' => '0.1.0' ] );
+        add_option( 'artpulse_settings', [
+            'version' => '0.1.0',
+        ] );
     }
 
-    // Register CPTs so flush_rewrite_rules() picks them up
-    \ArtPulse\Core\PostTypeRegistrar::register();
+    // Register CPTs so permalinks work immediately
+    PostTypeRegistrar::register();
     flush_rewrite_rules();
 
-    // Schedule daily expiry check (Phase 3)
+    // Schedule daily expiry check
     if ( ! wp_next_scheduled( 'ap_daily_expiry_check' ) ) {
         wp_schedule_event( time(), 'daily', 'ap_daily_expiry_check' );
     }
@@ -39,7 +48,9 @@ function artpulse_activate() {
 register_activation_hook( __FILE__, 'artpulse_activate' );
 
 /**
- * Runs on plugin deactivation.
+ * Runs on plugin deactivation:
+ *  - Flushes rewrite rules
+ *  - Clears scheduled cron
  */
 function artpulse_deactivate() {
     flush_rewrite_rules();
@@ -47,13 +58,28 @@ function artpulse_deactivate() {
 }
 register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
 
-// Hook all core modules
+/**
+ * Enqueue frontend assets
+ */
+function artpulse_enqueue_assets() {
+    wp_enqueue_style(
+        'artpulse-portfolio',
+        plugins_url( 'assets/css/ap-portfolio.css', __FILE__ ),
+        [],
+        '1.0.0'
+    );
+}
+add_action( 'wp_enqueue_scripts', 'artpulse_enqueue_assets' );
+
+/**
+ * Initialize all modules
+ */
 add_action( 'init', function() {
-    \ArtPulse\Core\PostTypeRegistrar::register();
-    \ArtPulse\Core\MetaBoxRegistrar::register();        // Phase 2.1
+    PostTypeRegistrar::register();
+    MetaBoxRegistrar::register();
     AdminDashboard::register();
     ShortcodeManager::register();
-    \ArtPulse\Core\SettingsPage::register();            // Phase 3
-    \ArtPulse\Core\MembershipManager::register();       // Phase 3
-    \ArtPulse\Core\AccessControlManager::register();    // Phase 3
-});
+    SettingsPage::register();
+    MembershipManager::register();
+    AccessControlManager::register();
+} );
