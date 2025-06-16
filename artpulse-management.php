@@ -19,6 +19,10 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
+// Manual requires for files with functions (NOT needed for PSR-4 classes)
+// require_once __DIR__ . '/src/Community/FavoritesManager.php';
+// require_once __DIR__ . '/src/Community/FavoritesRestController.php';
+
 /**
  * Runs on plugin activation.
  */
@@ -45,6 +49,9 @@ function artpulse_activate() {
     if ( ! wp_next_scheduled( 'ap_daily_expiry_check' ) ) {
         wp_schedule_event( time(), 'daily', 'ap_daily_expiry_check' );
     }
+
+    // Install favorites table on activation
+    \ArtPulse\Community\FavoritesManager::install_favorites_table();
 }
 register_activation_hook( __FILE__, 'artpulse_activate' );
 
@@ -91,8 +98,6 @@ add_action( 'init', function() {
     \ArtPulse\Core\UserDashboardManager::register();
     \ArtPulse\Core\AnalyticsManager::register();
     \ArtPulse\Core\AnalyticsDashboard::register();
-
-    // Front-end membership account page
     \ArtPulse\Core\FrontendMembershipPage::register();
 
     // WooCommerce purchase & lifecycle (if enabled)
@@ -101,6 +106,7 @@ add_action( 'init', function() {
         \ArtPulse\Core\WooCommerceIntegration::register();
         \ArtPulse\Core\PurchaseShortcode::register();
     }
+    // No need to install favorites table here (only on activation)
 } );
 
 /**
@@ -114,6 +120,7 @@ add_action( 'wp_enqueue_scripts', function() {
         '1.0.0',
         true
     );
+
     wp_localize_script(
         'ap-membership-account-js',
         'ArtPulseApi',
