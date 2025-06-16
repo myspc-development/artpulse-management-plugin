@@ -26,11 +26,12 @@ function artpulse_activate() {
     if ( false === get_option( 'artpulse_settings' ) ) {
         add_option( 'artpulse_settings', [ 'version' => '0.1.0' ] );
     }
+
     \ArtPulse\Core\PostTypeRegistrar::register();
     flush_rewrite_rules();
 
     $roles = [ 'administrator', 'editor' ];
-    $caps = [
+    $caps  = [
         // CPT capabilities...
     ];
     foreach ( $roles as $role_name ) {
@@ -40,6 +41,7 @@ function artpulse_activate() {
             }
         }
     }
+
     if ( ! wp_next_scheduled( 'ap_daily_expiry_check' ) ) {
         wp_schedule_event( time(), 'daily', 'ap_daily_expiry_check' );
     }
@@ -60,7 +62,7 @@ register_deactivation_hook( __FILE__, 'artpulse_deactivate' );
  */
 add_filter( 'template_include', function( $template ) {
     $pt   = get_post_type();
-    $cpts = [ 'artpulse_event','artpulse_artist','artpulse_artwork','artpulse_org' ];
+    $cpts = [ 'artpulse_event', 'artpulse_artist', 'artpulse_artwork', 'artpulse_org' ];
     if ( in_array( $pt, $cpts, true ) ) {
         $single  = plugin_dir_path( __FILE__ ) . "templates/salient/content-{$pt}.php";
         $archive = plugin_dir_path( __FILE__ ) . "templates/salient/archive-{$pt}.php";
@@ -99,4 +101,30 @@ add_action( 'init', function() {
         \ArtPulse\Core\WooCommerceIntegration::register();
         \ArtPulse\Core\PurchaseShortcode::register();
     }
+} );
+
+/**
+ * Enqueue front-end assets for the Membership Account page.
+ */
+add_action( 'wp_enqueue_scripts', function() {
+    wp_enqueue_script(
+        'ap-membership-account-js',
+        plugins_url( 'assets/js/ap-membership-account.js', __FILE__ ),
+        [ 'wp-api-fetch' ],
+        '1.0.0',
+        true
+    );
+    wp_localize_script(
+        'ap-membership-account-js',
+        'ArtPulseApi',
+        [
+            'root'        => esc_url_raw( rest_url() ),
+            'nonce'       => wp_create_nonce( 'wp_rest' ),
+            'i18n'        => [
+                'levelLabel'    => __( 'Membership Level', 'artpulse' ),
+                'expiresLabel'  => __( 'Expires', 'artpulse' ),
+                'errorFetching' => __( 'Unable to fetch account data. Please try again later.', 'artpulse' ),
+            ],
+        ]
+    );
 } );
