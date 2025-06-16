@@ -104,6 +104,7 @@ add_action( 'init', function() {
     \ArtPulse\Core\DirectoryManager::register();
     \ArtPulse\Core\UserDashboardManager::register();
     \ArtPulse\Core\AnalyticsManager::register();
+    \ArtPulse\Core\AnalyticsDashboard::register();
 
     
     add_filter('template_include', function($template) {
