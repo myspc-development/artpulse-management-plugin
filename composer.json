@@ -13,6 +13,7 @@
     }
   },
   "require-dev": {
+    "brain/monkey": "*",
     "phpunit/phpunit": "^9"
   }
 }
