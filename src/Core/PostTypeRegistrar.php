@@ -11,78 +11,99 @@ class PostTypeRegistrar
             'has_archive'  => true,
         ];
 
-        // 1) Events
+        // Events
         register_post_type('artpulse_event', array_merge($common, [
             'label'           => __('Events', 'artpulse'),
             'supports'        => ['title','editor','thumbnail','excerpt'],
             'rewrite'         => ['slug'=>'events'],
             'taxonomies'      => ['artpulse_event_type'],
             'capability_type' => 'artpulse_event',
-            'capabilities'    => [
-                'edit_post'           => 'edit_artpulse_event',
-                'read_post'           => 'read_artpulse_event',
-                'delete_post'         => 'delete_artpulse_event',
-                'edit_posts'          => 'edit_artpulse_events',
-                'edit_others_posts'   => 'edit_others_artpulse_events',
-                'publish_posts'       => 'publish_artpulse_events',
-                'read_private_posts'  => 'read_private_artpulse_events',
-            ],
+            'capabilities'    => [ /* ... */ ],
             'map_meta_cap'    => true,
         ]));
 
-        // 2) Artists
+        // Register Event meta for REST
+        register_post_meta('artpulse_event', '_ap_event_date', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+        register_post_meta('artpulse_event', '_ap_event_location', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+
+        // Artists
         register_post_type('artpulse_artist', array_merge($common, [
             'label'           => __('Artists', 'artpulse'),
             'supports'        => ['title','editor','thumbnail','custom-fields'],
             'rewrite'         => ['slug'=>'artists'],
             'capability_type' => 'artpulse_artist',
-            'capabilities'    => [
-                'edit_post'           => 'edit_artpulse_artist',
-                'read_post'           => 'read_artpulse_artist',
-                'delete_post'         => 'delete_artpulse_artist',
-                'edit_posts'          => 'edit_artpulse_artists',
-                'edit_others_posts'   => 'edit_others_artpulse_artists',
-                'publish_posts'       => 'publish_artpulse_artists',
-                'read_private_posts'  => 'read_private_artpulse_artists',
-            ],
+            'capabilities'    => [ /* ... */ ],
             'map_meta_cap'    => true,
         ]));
 
-        // 3) Artworks
+        // Register Artist meta for REST
+        register_post_meta('artpulse_artist', '_ap_artist_bio', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+        register_post_meta('artpulse_artist', '_ap_artist_org', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'integer',
+        ]);
+
+        // Artworks
         register_post_type('artpulse_artwork', array_merge($common, [
             'label'           => __('Artworks', 'artpulse'),
             'supports'        => ['title','editor','thumbnail','custom-fields'],
             'rewrite'         => ['slug'=>'artworks'],
             'capability_type' => 'artpulse_artwork',
-            'capabilities'    => [
-                'edit_post'           => 'edit_artpulse_artwork',
-                'read_post'           => 'read_artpulse_artwork',
-                'delete_post'         => 'delete_artpulse_artwork',
-                'edit_posts'          => 'edit_artpulse_artworks',
-                'edit_others_posts'   => 'edit_others_artpulse_artworks',
-                'publish_posts'       => 'publish_artpulse_artworks',
-                'read_private_posts'  => 'read_private_artpulse_artworks',
-            ],
+            'capabilities'    => [ /* ... */ ],
             'map_meta_cap'    => true,
         ]));
 
-        // 4) Organizations
+        // Register Artwork meta for REST
+        register_post_meta('artpulse_artwork', '_ap_artwork_medium', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+        register_post_meta('artpulse_artwork', '_ap_artwork_dimensions', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+        register_post_meta('artpulse_artwork', '_ap_artwork_materials', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+
+        // Organizations
         register_post_type('artpulse_org', array_merge($common, [
             'label'           => __('Organizations', 'artpulse'),
             'supports'        => ['title','editor','thumbnail'],
             'rewrite'         => ['slug'=>'organizations'],
             'capability_type' => 'artpulse_org',
-            'capabilities'    => [
-                'edit_post'           => 'edit_artpulse_org',
-                'read_post'           => 'read_artpulse_org',
-                'delete_post'         => 'delete_artpulse_org',
-                'edit_posts'          => 'edit_artpulse_orgs',
-                'edit_others_posts'   => 'edit_others_artpulse_orgs',
-                'publish_posts'       => 'publish_artpulse_orgs',
-                'read_private_posts'  => 'read_private_artpulse_orgs',
-            ],
+            'capabilities'    => [ /* ... */ ],
             'map_meta_cap'    => true,
         ]));
+
+        // Register Org meta for REST
+        register_post_meta('artpulse_org', '_ap_org_address', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
+        register_post_meta('artpulse_org', '_ap_org_website', [
+            'show_in_rest' => true,
+            'single'       => true,
+            'type'         => 'string',
+        ]);
 
         // Taxonomies
         register_taxonomy('artpulse_event_type','artpulse_event',[
