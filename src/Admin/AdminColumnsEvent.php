@@ -4,9 +4,9 @@ namespace ArtPulse\Admin;
 class AdminColumnsEvent {
 
     public static function register() {
-        add_filter('manage_ead_event_posts_columns', [self::class, 'add_columns']);
-        add_action('manage_ead_event_posts_custom_column', [self::class, 'render_columns'], 10, 2);
-        add_filter('manage_edit-ead_event_sortable_columns', [self::class, 'make_sortable']);
+        add_filter('manage_artpulse_event_posts_columns', [self::class, 'add_columns']);
+        add_action('manage_artpulse_event_posts_custom_column', [self::class, 'render_columns'], 10, 2);
+        add_filter('manage_edit-artpulse_event_sortable_columns', [self::class, 'make_sortable']);
     }
 
     public static function add_columns($columns) {

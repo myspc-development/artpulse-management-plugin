@@ -9,7 +9,7 @@ registerBlockType('artpulse/taxonomy-filter', {
     icon: 'filter',
     category: 'widgets',
     attributes: {
-        postType: { type: 'string', default: 'ead_artist' },
+        postType: { type: 'string', default: 'artpulse_artist' },
         taxonomy: { type: 'string', default: 'artist_specialty' },
         terms: { type: 'array', default: [] },
     },
@@ -25,7 +25,7 @@ registerBlockType('artpulse/taxonomy-filter', {
             // Get all custom post types with REST support
             apiFetch({ path: '/wp/v2/types' }).then((types) => {
                 const cpts = Object.entries(types)
-                    .filter(([key, val]) => val.rest_base && key.startsWith('ead_'))
+                    .filter(([key, val]) => val.rest_base && key.startsWith('artpulse_'))
                     .map(([key]) => key);
                 setAvailablePostTypes(cpts);
             });

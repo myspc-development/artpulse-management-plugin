@@ -9,7 +9,7 @@ registerBlockType('artpulse/ajax-filter', {
     category: 'widgets',
 
     attributes: {
-        postType: { type: 'string', default: 'ead_artist' },
+        postType: { type: 'string', default: 'artpulse_artist' },
         taxonomy: { type: 'string', default: 'artist_specialty' },
     },
 
@@ -20,7 +20,7 @@ registerBlockType('artpulse/ajax-filter', {
 
         useEffect(() => {
             apiFetch({ path: '/wp/v2/types' }).then(types => {
-                const filtered = Object.entries(types).filter(([key]) => key.startsWith('ead_'));
+                const filtered = Object.entries(types).filter(([key]) => key.startsWith('artpulse_'));
                 setPostTypes(filtered.map(([key]) => ({ label: key, value: key })));
             });
         }, []);

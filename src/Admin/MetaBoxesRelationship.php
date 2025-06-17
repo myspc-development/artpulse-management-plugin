@@ -8,45 +8,45 @@ class MetaBoxesRelationship
         [
             'id'           => 'ap_artist_artworks',
             'title'        => 'Associated Artworks',
-            'screen'       => 'ead_artist',
+            'screen'       => 'artpulse_artist',
             'meta_key'     => '_ap_artist_artworks',
-            'related_type' => 'ead_artwork',
+            'related_type' => 'artpulse_artwork',
             'multiple'     => true,
             'description'  => 'Select artworks related to this artist.',
         ],
         [
             'id'           => 'ap_event_artworks',
             'title'        => 'Featured Artworks',
-            'screen'       => 'ead_event',
+            'screen'       => 'artpulse_event',
             'meta_key'     => '_ap_event_artworks',
-            'related_type' => 'ead_artwork',
+            'related_type' => 'artpulse_artwork',
             'multiple'     => true,
             'description'  => 'Select artworks featured in this event.',
         ],
         [
             'id'           => 'ap_event_organizations',
             'title'        => 'Participating Organizations',
-            'screen'       => 'ead_event',
+            'screen'       => 'artpulse_event',
             'meta_key'     => '_ap_event_organizations',
-            'related_type' => 'ead_organization',
+            'related_type' => 'artpulse_org',
             'multiple'     => true,
             'description'  => 'Select organizations participating in this event.',
         ],
         [
             'id'           => 'ap_artwork_artist',
             'title'        => 'Artwork Artist',
-            'screen'       => 'ead_artwork',
+            'screen'       => 'artpulse_artwork',
             'meta_key'     => '_ap_artwork_artist',
-            'related_type' => 'ead_artist',
+            'related_type' => 'artpulse_artist',
             'multiple'     => false,
             'description'  => 'Select the artist for this artwork.',
         ],
         [
             'id'           => 'ap_org_artists',
             'title'        => 'Associated Artists',
-            'screen'       => 'ead_organization',
+            'screen'       => 'artpulse_org',
             'meta_key'     => '_ap_org_artists',
-            'related_type' => 'ead_artist',
+            'related_type' => 'artpulse_artist',
             'multiple'     => true,
             'description'  => 'Select artists associated with this organization.',
         ],
@@ -172,7 +172,7 @@ class MetaBoxesRelationship
         check_ajax_referer('ap_ajax_nonce', 'nonce');
 
         $term = sanitize_text_field($_GET['q'] ?? '');
-        $post_type = sanitize_text_field($_GET['post_type'] ?? 'ead_artwork');
+        $post_type = sanitize_text_field($_GET['post_type'] ?? 'artpulse_artwork');
 
         $args = [
             'post_type'      => $post_type,

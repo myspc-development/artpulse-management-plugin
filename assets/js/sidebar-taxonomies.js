@@ -6,16 +6,16 @@ const { compose } = wp.compose;
 const { Fragment } = wp.element;
 
 const taxonomiesConfig = {
-    ead_artist: [
+    artpulse_artist: [
         { slug: 'artist_specialty', label: 'Artist Specialties' },
     ],
-    ead_artwork: [
+    artpulse_artwork: [
         { slug: 'artwork_style', label: 'Artwork Styles' },
     ],
-    ead_event: [
+    artpulse_event: [
         { slug: 'event_type', label: 'Event Types' },
     ],
-    ead_organization: [
+    artpulse_org: [
         { slug: 'organization_category', label: 'Organization Categories' },
     ],
 };
