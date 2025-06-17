@@ -1,0 +1,82 @@
+🔮 ArtPulse Phase 2 Upgrade Plan
+
+This document outlines scoped deliverables and architectural notes for advanced features to evolve the ArtPulse plugin into a robust social platform for the arts community.
+
+🌐 Multi-language Support (i18n-ready Forms)
+
+Goal:
+
+Make all front-end forms and text translatable using WordPress internationalization standards.
+
+Tasks:
+
+
+
+🍂 Calendar of Approved Events
+
+Goal:
+
+Create a frontend calendar block or shortcode that displays approved public events.
+
+Tasks:
+
+
+
+📧 Approval/Decline Email Notifications
+
+Goal:
+
+Send automated emails to moderators and users for post approval workflows.
+
+Tasks:
+
+
+
+📊 Analytics Dashboard per Artist/Org
+
+Goal:
+
+Visualize content activity per artist or org (views, submissions, engagement).
+
+Tasks:
+
+
+
+📍 Map-Based Event Search with Proximity Filter
+
+Goal:
+
+Enable users to search upcoming events by map + distance.
+
+Tasks:
+
+
+
+💌 User-to-User Messaging / Collaboration
+
+Goal:
+
+Allow artists, orgs, and members to message each other or submit collab requests.
+
+Tasks:
+
+
+
+📷 Featured Content Slider
+
+Goal:
+
+Add a homepage slider for featured artists, events, or artwork.
+
+Tasks:
+
+
+
+🤖 Meta Field-Based Search + Filtering UI
+
+Goal:
+
+Enable advanced filtering by custom fields across CPT archive pages.
+
+Tasks:
+
