@@ -30,8 +30,22 @@ if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 
 use ArtPulse\Core\Plugin;
 
-// Instantiate the plugin class
-$plugin = new Plugin();
+// Instantiate the plugin class if available; otherwise show admin notice
+if ( class_exists( Plugin::class ) ) {
+    $plugin = new Plugin();
+} else {
+    add_action(
+        'admin_notices',
+        static function () {
+            echo '<div class="notice notice-error"><p>';
+            esc_html_e(
+                'ArtPulse Management requires Composer dependencies. Please run "composer install".',
+                'artpulse'
+            );
+            echo '</p></div>';
+        }
+    );
+}
 
 
 // All other hooks (init, enqueue, REST API, etc.) are registered inside Plugin::__construct()
