@@ -20,7 +20,9 @@ process(is_array($argv) ? $argv : array());
  */
 function setupEnvironment()
 {
-    ini_set('display_errors', 1);
+    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+        ini_set('display_errors', 1);
+    }
 
     if (extension_loaded('uopz') && !(ini_get('uopz.disable') || ini_get('uopz.exit'))) {
         // uopz works at opcode level and disables exit calls
