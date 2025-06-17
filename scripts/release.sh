@@ -8,7 +8,8 @@ PLUGIN_DIR="$(pwd)"
 PLUGIN_NAME="artpulse-management-plugin"
 
 # Extract version from plugin header
-VERSION=$(grep -m1 '^ \* Version:' artpulse-management.php | awk '{print $2}')
+# Extract the version number (e.g. 1.1.5) from the plugin header
+VERSION=$(grep -m1 '^ \* Version:' artpulse-management.php | awk '{print $3}')
 RELEASE_DIR="$PLUGIN_DIR/release"
 ZIP_FILE="$PLUGIN_NAME-$VERSION.zip"
 
