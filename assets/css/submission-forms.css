@@ -1,0 +1,39 @@
+/* Styles for frontend submission forms */
+.ap-submission-form {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.ap-submission-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.ap-submission-form input,
+.ap-submission-form select,
+.ap-submission-form textarea {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+.ap-submission-form button {
+  background-color: #0073aa;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ap-submission-form button:hover {
+  background-color: #005177;
+}
