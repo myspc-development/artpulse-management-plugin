@@ -1,4 +1,5 @@
 <?php
+
 namespace ArtPulse\Core;
 
 class PostTypeRegistrar
@@ -9,110 +10,114 @@ class PostTypeRegistrar
             'public'       => true,
             'show_in_rest' => true,
             'has_archive'  => true,
+            'supports'     => ['title', 'editor', 'thumbnail'],
         ];
 
-        // Events
-        register_post_type('artpulse_event', array_merge($common, [
-            'label'           => __('Events', 'artpulse'),
-            'supports'        => ['title','editor','thumbnail','excerpt'],
-            'rewrite'         => ['slug'=>'events'],
-            'taxonomies'      => ['artpulse_event_type'],
-            'capability_type' => 'artpulse_event',
-            'capabilities'    => [ /* ... */ ],
-            'map_meta_cap'    => true,
-        ]));
+        $template_common = [
+            ['core/paragraph', ['placeholder' => 'Write something...']],
+        ];
 
-        // Register Event meta for REST
-        register_post_meta('artpulse_event', '_ap_event_date', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
-        register_post_meta('artpulse_event', '_ap_event_location', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
+        $locked = 'all';
 
-        // Artists
-        register_post_type('artpulse_artist', array_merge($common, [
-            'label'           => __('Artists', 'artpulse'),
-            'supports'        => ['title','editor','thumbnail','custom-fields'],
-            'rewrite'         => ['slug'=>'artists'],
-            'capability_type' => 'artpulse_artist',
-            'capabilities'    => [ /* ... */ ],
-            'map_meta_cap'    => true,
-        ]));
+        $post_types = [
+            'artpulse_event' => [
+                'label'     => __('Events', 'artpulse'),
+                'menu_icon' => 'dashicons-calendar',
+                'rewrite'   => ['slug' => 'events'],
+                'taxonomies' => ['artpulse_event_type'],
+            ],
+            'artpulse_artist' => [
+                'label'     => __('Artists', 'artpulse'),
+                'menu_icon' => 'dashicons-admin-users',
+                'rewrite'   => ['slug' => 'artists'],
+            ],
+            'artpulse_artwork' => [
+                'label'     => __('Artworks', 'artpulse'),
+                'menu_icon' => 'dashicons-art',
+                'rewrite'   => ['slug' => 'artworks'],
+            ],
+            'artpulse_org' => [
+                'label'     => __('Organizations', 'artpulse'),
+                'menu_icon' => 'dashicons-building',
+                'rewrite'   => ['slug' => 'organizations'],
+            ],
+            'artpulse_org_review' => [
+                'label'     => __('Org Reviews', 'artpulse'),
+                'menu_icon' => 'dashicons-visibility',
+                'rewrite'   => ['slug' => 'org-reviews'],
+                'public'    => false,
+                'show_ui'   => true,
+            ],
+            'ap_membership_request' => [
+                'label'     => __('Membership Requests', 'artpulse'),
+                'menu_icon' => 'dashicons-id',
+                'rewrite'   => ['slug' => 'membership-requests'],
+                'public'    => false,
+                'show_ui'   => true,
+            ],
+        ];
 
-        // Register Artist meta for REST
-        register_post_meta('artpulse_artist', '_ap_artist_bio', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
-        register_post_meta('artpulse_artist', '_ap_artist_org', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'integer',
-        ]);
+        foreach ($post_types as $type => $args) {
+            $merged_args = array_merge(
+                $common,
+                $args,
+                [
+                    'capability_type' => $type,
+                    'capabilities'    => self::generate_caps($type),
+                    'map_meta_cap'    => true,
+                    'template'        => $template_common,
+                    'template_lock'   => $locked,
+                    'show_in_rest'    => true,
+                ]
+            );
 
-        // Artworks
-        register_post_type('artpulse_artwork', array_merge($common, [
-            'label'           => __('Artworks', 'artpulse'),
-            'supports'        => ['title','editor','thumbnail','custom-fields'],
-            'rewrite'         => ['slug'=>'artworks'],
-            'capability_type' => 'artpulse_artwork',
-            'capabilities'    => [ /* ... */ ],
-            'map_meta_cap'    => true,
-        ]));
+            // Override public and show_ui if explicitly set in $args
+            if (isset($args['public'])) {
+                $merged_args['public'] = $args['public'];
+            }
+            if (isset($args['show_ui'])) {
+                $merged_args['show_ui'] = $args['show_ui'];
+            }
 
-        // Register Artwork meta for REST
-        register_post_meta('artpulse_artwork', '_ap_artwork_medium', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
-        register_post_meta('artpulse_artwork', '_ap_artwork_dimensions', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
-        register_post_meta('artpulse_artwork', '_ap_artwork_materials', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
+            register_post_type($type, $merged_args);
+        }
 
-        // Organizations
-        register_post_type('artpulse_org', array_merge($common, [
-            'label'           => __('Organizations', 'artpulse'),
-            'supports'        => ['title','editor','thumbnail'],
-            'rewrite'         => ['slug'=>'organizations'],
-            'capability_type' => 'artpulse_org',
-            'capabilities'    => [ /* ... */ ],
-            'map_meta_cap'    => true,
-        ]));
-
-        // Register Org meta for REST
-        register_post_meta('artpulse_org', '_ap_org_address', [
+        // Register Taxonomies
+        register_taxonomy('artpulse_event_type', 'artpulse_event', [
+            'label'        => __('Event Types', 'artpulse'),
+            'public'       => true,
             'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
-        ]);
-        register_post_meta('artpulse_org', '_ap_org_website', [
-            'show_in_rest' => true,
-            'single'       => true,
-            'type'         => 'string',
+            'hierarchical' => true,
+            'rewrite'      => ['slug' => 'event-types'],
         ]);
 
-        // Taxonomies
-        register_taxonomy('artpulse_event_type','artpulse_event',[
-            'label'=>__('Event Types','artpulse'),
-            'public'=>true,'show_in_rest'=>true,'hierarchical'=>true,'rewrite'=>['slug'=>'event-types'],
+        register_taxonomy('artpulse_medium', 'artpulse_artwork', [
+            'label'        => __('Medium', 'artpulse'),
+            'public'       => true,
+            'show_in_rest' => true,
+            'hierarchical' => true,
+            'rewrite'      => ['slug' => 'medium'],
         ]);
-        register_taxonomy('artpulse_medium','artpulse_artwork',[
-            'label'=>__('Medium','artpulse'),
-            'public'=>true,'show_in_rest'=>true,'hierarchical'=>true,'rewrite'=>['slug'=>'medium'],
-        ]);
+    }
+
+    public static function generate_caps($type): array
+    {
+        return [
+            "edit_{$type}",
+            "read_{$type}",
+            "delete_{$type}",
+            "edit_{$type}s",
+            "edit_others_{$type}s",
+            "publish_{$type}s",
+            "read_private_{$type}s",
+            "delete_{$type}s",
+            "delete_private_{$type}s",
+            "delete_published_{$type}s",
+            "delete_others_{$type}s",
+            "edit_private_{$type}s",
+            "edit_published_{$type}s",
+            'read',
+            'create_posts', // Added create_posts capability
+        ];
     }
 }

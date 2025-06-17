@@ -8,7 +8,7 @@ class EnqueueAssets
         add_action('enqueue_block_editor_assets', [self::class, 'enqueue_block_editor_assets']);
         add_action('enqueue_block_editor_assets', [self::class, 'enqueue_block_editor_styles']);
 
-        // Enqueue frontend CSS for AJAX filter UI and item styles
+        // Enqueue frontend CSS for AJAX filter UI, item styles, and submission forms
         add_action('wp_enqueue_scripts', [self::class, 'enqueue_frontend_styles']);
     }
 
@@ -119,6 +119,17 @@ class EnqueueAssets
             $item_style_url,
             [],
             filemtime($item_style_path)
+        );
+
+        // Frontend submission forms styles
+        $submission_style_path = __DIR__ . '/../../assets/css/submission-forms.css';
+        $submission_style_url  = plugins_url('assets/css/submission-forms.css', dirname(__DIR__, 3) . '/artpulse-management.php');
+
+        wp_enqueue_style(
+            'artpulse-submission-forms',
+            $submission_style_url,
+            [],
+            filemtime($submission_style_path)
         );
     }
 }

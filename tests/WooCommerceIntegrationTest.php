@@ -1,5 +1,9 @@
 <?php
 // tests/WooCommerceIntegrationTest.php
+namespace ArtPulse\Tests;
+
+use stdClass;
+
 
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey;

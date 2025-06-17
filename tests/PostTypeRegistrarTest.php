@@ -1,5 +1,7 @@
 <?php
 // tests/PostTypeRegistrarTest.php
+namespace ArtPulse\Tests;
+
 
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey;

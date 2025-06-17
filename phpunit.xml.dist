@@ -7,12 +7,22 @@
 >
     <testsuites>
         <testsuite name="ArtPulse Plugin Tests">
-            <!-- Only load files ending in Test.php -->
+            <!-- Only load test files ending in Test.php -->
             <directory suffix="Test.php">tests</directory>
         </testsuite>
     </testsuites>
+
     <php>
+        <!-- Show all errors during tests -->
         <ini name="error_reporting" value="-1"/>
         <ini name="display_errors"  value="1"/>
+
+        <!-- Point to your WP test scaffolding -->
+        <env name="WP_TESTS_DIR" value="/tmp/wordpress-tests-lib"/>
+        <env name="WP_CORE_DIR"   value="/tmp/wordpress/src"/>
+
+        <!-- Set up memory and time limits for long test runs -->
+        <ini name="memory_limit" value="2G"/>
+        <ini name="max_execution_time" value="600"/>
     </php>
 </phpunit>

@@ -21,20 +21,31 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: mbstring, intl, curl, json
+          extensions: mbstring, intl, curl, json, zip, opcache
           coverage: none
 
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
       - name: Install Composer dependencies
-        run: |
-          composer install --prefer-dist --no-interaction --no-progress
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Optimize Composer autoloader
+        run: composer dump-autoload -o
 
       - name: Run PHPUnit tests
-        run: |
-          vendor/bin/phpunit --configuration phpunit.xml.dist
+        run: vendor/bin/phpunit --configuration phpunit.xml.dist
 
-      - name: Lint PHP files
+      - name: Lint PHP files with PHPCS
+        if: ${{ always() }}
         run: |
-          # Optional: run PHP CodeSniffer if configured
           if [ -f phpcs.xml.dist ]; then
-            vendor/bin/phpcs --standard=phpcs.xml.dist .
+            vendor/bin/phpcs --standard=phpcs.xml.dist src/ tests/
+          fi
+
+      - name: Check fixable PHPCS issues
+        if: ${{ always() }}
+        run: |
+          if [ -f phpcs.xml.dist ]; then
+            vendor/bin/phpcbf --standard=phpcs.xml.dist --dry-run --stop-on-violation src/ tests/
           fi
