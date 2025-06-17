@@ -16,13 +16,57 @@ class FavoritesRestController {
     }
 
     public static function handle_toggle($request) {
-        // TODO: Implement add/remove favorite logic here
-        return [ 'success' => true ];
+        $user_id    = get_current_user_id();
+        $object_id  = intval($request['object_id']);
+        $object_type = sanitize_text_field($request['object_type']);
+        $action     = sanitize_text_field($request['action']); // "add" or "remove"
+
+        if (!$object_id || !$object_type) {
+            return new \WP_Error('invalid', 'Missing object', ['status' => 400]);
+        }
+
+        if ($action === 'add') {
+            FavoritesManager::add_favorite($user_id, $object_id, $object_type);
+            $state = true;
+        } else {
+            FavoritesManager::remove_favorite($user_id, $object_id, $object_type);
+            $state = false;
+        }
+
+        return [
+            'success'   => true,
+            'favorited' => $state,
+        ];
     }
 
     public static function handle_get($request) {
-        // TODO: Implement fetching user favorites here
-        return [];
+        $user_id = get_current_user_id();
+        $type    = sanitize_text_field($request['object_type'] ?? '');
+        $favs    = FavoritesManager::get_user_favorites($user_id, $type ?: null);
+
+        $results = [];
+        foreach ($favs as $f) {
+            $map = [
+                'artist'  => 'artpulse_artist',
+                'event'   => 'artpulse_event',
+                'artwork' => 'artpulse_artwork',
+                'org'     => 'artpulse_org',
+            ];
+            $post_type = $map[$f->object_type] ?? 'artpulse_' . $f->object_type;
+            $post = get_post($f->object_id);
+            if ($post && $post->post_type === $post_type) {
+                $results[] = [
+                    'object_id'          => $f->object_id,
+                    'object_type'        => $f->object_type,
+                    'favorited_on'       => $f->favorited_on,
+                    'title'              => get_the_title($f->object_id),
+                    'permalink'          => get_permalink($f->object_id),
+                    'featured_media_url' => get_the_post_thumbnail_url($f->object_id, 'medium'),
+                ];
+            }
+        }
+
+        return rest_ensure_response($results);
     }
 }
 
