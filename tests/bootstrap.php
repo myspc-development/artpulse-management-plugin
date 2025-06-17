@@ -4,7 +4,9 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+    ini_set('display_errors', '1');
+}
 
 // WP function stubs (safe to stub manually if not mocked in tests)
 if (!function_exists('get_option')) {
