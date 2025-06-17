@@ -1,6 +1,8 @@
 <?php
 namespace ArtPulse\Community;
 
+use ArtPulse\Community\EmailNotifier;
+
 class NotificationManager {
     public static function install_notifications_table() {
         global $wpdb;
@@ -25,15 +27,19 @@ class NotificationManager {
     public static function add($user_id, $type, $object_id = null, $related_id = null, $content = '', $status = 'unread') {
         global $wpdb;
         $table = $wpdb->prefix . 'ap_notifications';
+
         $wpdb->insert($table, [
-            'user_id'   => $user_id,
-            'type'      => $type,
-            'object_id' => $object_id,
-            'related_id'=> $related_id,
-            'content'   => $content,
-            'status'    => $status,
-            'created_at'=> current_time('mysql')
+            'user_id'    => $user_id,
+            'type'       => $type,
+            'object_id'  => $object_id,
+            'related_id' => $related_id,
+            'content'    => $content,
+            'status'     => $status,
+            'created_at' => current_time('mysql')
         ]);
+
+        // Trigger optional email notification
+        EmailNotifier::maybe_send($user_id, $type, $object_id, $related_id, $content);
     }
 
     public static function get($user_id, $limit = 25) {
@@ -45,11 +51,20 @@ class NotificationManager {
         ));
     }
 
+    public static function mark_all_read($user_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ap_notifications';
+        $wpdb->update($table, ['status' => 'read'], [
+            'user_id' => $user_id,
+            'status'  => 'unread'
+        ]);
+    }
+
     public static function mark_read($notification_id, $user_id) {
         global $wpdb;
         $table = $wpdb->prefix . 'ap_notifications';
         $wpdb->update($table, ['status' => 'read'], [
-            'id' => $notification_id,
+            'id'      => $notification_id,
             'user_id' => $user_id
         ]);
     }

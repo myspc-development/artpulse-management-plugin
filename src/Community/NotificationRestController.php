@@ -8,9 +8,17 @@ class NotificationRestController {
             'callback'            => [self::class, 'list'],
             'permission_callback' => function() { return is_user_logged_in(); }
         ]);
+
         register_rest_route('artpulse/v1', '/notifications/(?P<id>\d+)/read', [
             'methods'             => 'POST',
             'callback'            => [self::class, 'mark_read'],
+            'permission_callback' => function() { return is_user_logged_in(); }
+        ]);
+
+        // ✅ New route for marking all notifications as read
+        register_rest_route('artpulse/v1', '/notifications/mark-all-read', [
+            'methods'             => 'POST',
+            'callback'            => [self::class, 'mark_all_read'],
             'permission_callback' => function() { return is_user_logged_in(); }
         ]);
     }
@@ -25,6 +33,13 @@ class NotificationRestController {
         $user_id = get_current_user_id();
         $id = intval($req['id']);
         NotificationManager::mark_read($id, $user_id);
+        return ['success' => true];
+    }
+
+    // ✅ Handler for "Mark All Read"
+    public static function mark_all_read($req) {
+        $user_id = get_current_user_id();
+        NotificationManager::mark_all_read($user_id);
         return ['success' => true];
     }
 }

@@ -111,6 +111,9 @@ add_action( 'init', function() {
     \ArtPulse\Core\FrontendMembershipPage::register();
     \ArtPulse\Community\ProfileLinkRequestManager::register();
     \ArtPulse\Core\MyFollowsShortcode::register();
+    \ArtPulse\Core\NotificationShortcode::register();
+    
+
 
     // WooCommerce purchase & lifecycle (if enabled)
     $opts = get_option( 'artpulse_settings', [] );
@@ -139,6 +142,20 @@ add_action( 'wp_enqueue_scripts', function() {
         '1.0.0',
         true
     );
+    
+    wp_enqueue_script(
+    'ap-notifications-js',
+    plugins_url('assets/js/ap-notifications.js', __FILE__),
+    ['wp-api-fetch'],
+    '1.0.0',
+    true
+);
+wp_localize_script('ap-notifications-js', 'APNotifications', [
+    'apiRoot' => esc_url_raw(rest_url()),
+    'nonce'   => wp_create_nonce('wp_rest')
+]);
+
+    
     wp_localize_script(
         'ap-membership-account-js',
         'ArtPulseApi',
