@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function(){
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          this.classList.toggle('active');
+          this.classList.toggle('active', data.favorited);
         } else {
           alert(data.message || 'Error updating favorite');
         }
