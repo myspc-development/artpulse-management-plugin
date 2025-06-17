@@ -4,9 +4,9 @@ namespace ArtPulse\Admin;
 class AdminColumnsArtwork {
 
     public static function register() {
-        add_filter('manage_ead_artwork_posts_columns', [self::class, 'add_columns']);
-        add_action('manage_ead_artwork_posts_custom_column', [self::class, 'render_column'], 10, 2);
-        add_filter('manage_edit-ead_artwork_sortable_columns', [self::class, 'sortable_columns']);
+        add_filter('manage_artpulse_artwork_posts_columns', [self::class, 'add_columns']);
+        add_action('manage_artpulse_artwork_posts_custom_column', [self::class, 'render_column'], 10, 2);
+        add_filter('manage_edit-artpulse_artwork_sortable_columns', [self::class, 'sortable_columns']);
         add_action('quick_edit_custom_box', [self::class, 'quick_edit_box'], 10, 2);
         add_action('save_post', [self::class, 'save_quick_edit'], 10, 2);
     }
@@ -55,7 +55,7 @@ class AdminColumnsArtwork {
     }
 
     public static function quick_edit_box($column, $post_type) {
-        if ($post_type !== 'ead_artwork' || $column !== 'artwork_featured') return;
+        if ($post_type !== 'artpulse_artwork' || $column !== 'artwork_featured') return;
         ?>
         <fieldset class="inline-edit-col-left">
             <div class="inline-edit-col">
@@ -69,7 +69,7 @@ class AdminColumnsArtwork {
     }
 
     public static function save_quick_edit($post_id, $post) {
-        if ($post->post_type !== 'ead_artwork') return;
+        if ($post->post_type !== 'artpulse_artwork') return;
 
         if (isset($_POST['artwork_featured'])) {
             update_post_meta($post_id, 'artwork_featured', '1');

@@ -11,7 +11,7 @@ class MetaBoxesAddress {
         foreach ($post_types as $post_type) {
             add_action("add_meta_boxes_{$post_type}", function($post) use ($post_type) {
                 add_meta_box(
-                    'ead_address_' . $post_type,
+                    'artpulse_address_' . $post_type,
                     __('Address', 'artpulse-management'),
                     [self::class, 'render_address_meta_box'],
                     $post_type,
@@ -27,7 +27,7 @@ class MetaBoxesAddress {
     }
 
     public static function render_address_meta_box($post) {
-        wp_nonce_field('ead_address_meta_nonce', 'ead_address_meta_nonce_field');
+        wp_nonce_field('artpulse_address_meta_nonce', 'artpulse_address_meta_nonce_field');
 
         $fields = self::get_address_meta_fields();
 
@@ -42,7 +42,7 @@ class MetaBoxesAddress {
     }
 
     public static function save_address_meta($post_id, $post) {
-        if (!isset($_POST['ead_address_meta_nonce_field']) || !wp_verify_nonce($_POST['ead_address_meta_nonce_field'], 'ead_address_meta_nonce')) {
+        if (!isset($_POST['artpulse_address_meta_nonce_field']) || !wp_verify_nonce($_POST['artpulse_address_meta_nonce_field'], 'artpulse_address_meta_nonce')) {
             return;
         }
 

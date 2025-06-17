@@ -5,7 +5,7 @@ class MetaBoxesArtwork {
 
     public static function register() {
         add_action('add_meta_boxes', [self::class, 'add_artwork_meta_boxes']);
-        add_action('save_post_ead_artwork', [self::class, 'save_artwork_meta'], 10, 2);
+        add_action('save_post_artpulse_artwork', [self::class, 'save_artwork_meta'], 10, 2);
         add_action('rest_api_init', [self::class, 'register_rest_fields']);
         add_action('restrict_manage_posts', [self::class, 'add_admin_filters']);
         add_filter('pre_get_posts', [self::class, 'filter_artworks_admin_query']);
@@ -13,17 +13,17 @@ class MetaBoxesArtwork {
 
     public static function add_artwork_meta_boxes() {
         add_meta_box(
-            'ead_artwork_details',
+            'artpulse_artwork_details',
             __('Artwork Details', 'artpulse-management'),
             [self::class, 'render_artwork_details'],
-            'ead_artwork',
+            'artpulse_artwork',
             'normal',
             'high'
         );
     }
 
     public static function render_artwork_details($post) {
-        wp_nonce_field('ead_artwork_meta_nonce', 'ead_artwork_meta_nonce_field');
+        wp_nonce_field('artpulse_artwork_meta_nonce', 'artpulse_artwork_meta_nonce_field');
 
         $fields = self::get_registered_artwork_meta_fields();
 
@@ -55,12 +55,12 @@ class MetaBoxesArtwork {
     }
 
     public static function save_artwork_meta($post_id, $post) {
-        if (!isset($_POST['ead_artwork_meta_nonce_field']) || !wp_verify_nonce($_POST['ead_artwork_meta_nonce_field'], 'ead_artwork_meta_nonce')) {
+        if (!isset($_POST['artpulse_artwork_meta_nonce_field']) || !wp_verify_nonce($_POST['artpulse_artwork_meta_nonce_field'], 'artpulse_artwork_meta_nonce')) {
             return;
         }
 
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if ($post->post_type !== 'ead_artwork') return;
+        if ($post->post_type !== 'artpulse_artwork') return;
 
         $fields = array_keys(self::get_registered_artwork_meta_fields());
         foreach ($fields as $field) {
@@ -86,7 +86,7 @@ class MetaBoxesArtwork {
 
     public static function register_rest_fields() {
         foreach (self::get_registered_artwork_meta_fields() as $field => $args) {
-            register_rest_field('ead_artwork', $field, [
+            register_rest_field('artpulse_artwork', $field, [
                 'get_callback' => function($object) use ($field) {
                     return get_post_meta($object['id'], $field, true);
                 },
@@ -102,7 +102,7 @@ class MetaBoxesArtwork {
     }
 
     public static function add_admin_filters() {
-        if (get_post_type() !== 'ead_artwork') return;
+        if (get_post_type() !== 'artpulse_artwork') return;
 
         $selected = $_GET['artwork_featured'] ?? '';
         echo '<select name="artwork_featured">
@@ -113,7 +113,7 @@ class MetaBoxesArtwork {
     }
 
     public static function filter_artworks_admin_query($query) {
-        if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'ead_artwork') return;
+        if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'artpulse_artwork') return;
 
         if (isset($_GET['artwork_featured']) && $_GET['artwork_featured'] !== '') {
             $query->set('meta_key', 'artwork_featured');

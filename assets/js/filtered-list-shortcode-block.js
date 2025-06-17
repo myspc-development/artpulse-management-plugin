@@ -5,10 +5,10 @@ const { useState, useEffect } = wp.element;
 const { apiFetch } = wp;
 
 const postTypeOptions = [
-    { label: 'Artist', value: 'ead_artist' },
-    { label: 'Artwork', value: 'ead_artwork' },
-    { label: 'Event', value: 'ead_event' },
-    { label: 'Organization', value: 'ead_organization' },
+    { label: 'Artist', value: 'artpulse_artist' },
+    { label: 'Artwork', value: 'artpulse_artwork' },
+    { label: 'Event', value: 'artpulse_event' },
+    { label: 'Organization', value: 'artpulse_org' },
 ];
 
 registerBlockType('artpulse/filtered-list-shortcode', {
@@ -16,7 +16,7 @@ registerBlockType('artpulse/filtered-list-shortcode', {
     icon: 'list-view',
     category: 'widgets',
     attributes: {
-        postType: { type: 'string', default: 'ead_artist' },
+        postType: { type: 'string', default: 'artpulse_artist' },
         taxonomy: { type: 'string', default: 'artist_specialty' },
         terms: { type: 'string', default: '' },
         postsPerPage: { type: 'number', default: 5 },

@@ -5,7 +5,7 @@ class MetaBoxesArtist {
 
     public static function register() {
         add_action('add_meta_boxes', [self::class, 'add_artist_meta_boxes']);
-        add_action('save_post_ead_artist', [self::class, 'save_artist_meta'], 10, 2);
+        add_action('save_post_artpulse_artist', [self::class, 'save_artist_meta'], 10, 2);
         add_action('rest_api_init', [self::class, 'register_rest_fields']);
         add_action('restrict_manage_posts', [self::class, 'add_admin_filters']);
         add_filter('pre_get_posts', [self::class, 'filter_admin_query']);
@@ -13,17 +13,17 @@ class MetaBoxesArtist {
 
     public static function add_artist_meta_boxes() {
         add_meta_box(
-            'ead_artist_details',
+            'artpulse_artist_details',
             __('Artist Details', 'artpulse-management'),
             [self::class, 'render_artist_details'],
-            'ead_artist',
+            'artpulse_artist',
             'normal',
             'high'
         );
     }
 
     public static function render_artist_details($post) {
-        wp_nonce_field('ead_artist_meta_nonce', 'ead_artist_meta_nonce_field');
+        wp_nonce_field('artpulse_artist_meta_nonce', 'artpulse_artist_meta_nonce_field');
 
         $fields = self::get_registered_artist_meta_fields();
 
@@ -55,12 +55,12 @@ class MetaBoxesArtist {
     }
 
     public static function save_artist_meta($post_id, $post) {
-        if (!isset($_POST['ead_artist_meta_nonce_field']) || !wp_verify_nonce($_POST['ead_artist_meta_nonce_field'], 'ead_artist_meta_nonce')) {
+        if (!isset($_POST['artpulse_artist_meta_nonce_field']) || !wp_verify_nonce($_POST['artpulse_artist_meta_nonce_field'], 'artpulse_artist_meta_nonce')) {
             return;
         }
 
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if ($post->post_type !== 'ead_artist') return;
+        if ($post->post_type !== 'artpulse_artist') return;
 
         $fields = self::get_registered_artist_meta_fields();
         foreach ($fields as $field => $args) {
@@ -93,7 +93,7 @@ class MetaBoxesArtist {
 
     public static function register_rest_fields() {
         foreach (array_keys(self::get_registered_artist_meta_fields()) as $key) {
-            register_rest_field('ead_artist', $key, [
+            register_rest_field('artpulse_artist', $key, [
                 'get_callback' => function($object) use ($key) {
                     return get_post_meta($object['id'], $key, true);
                 },
@@ -106,7 +106,7 @@ class MetaBoxesArtist {
     }
 
     public static function add_admin_filters() {
-        if (get_current_screen()->post_type !== 'ead_artist') return;
+        if (get_current_screen()->post_type !== 'artpulse_artist') return;
         $selected = $_GET['artist_featured'] ?? '';
         echo '<select name="artist_featured">';
         echo '<option value="">' . __('Filter by Featured', 'artpulse-management') . '</option>';
@@ -116,7 +116,7 @@ class MetaBoxesArtist {
     }
 
     public static function filter_admin_query($query) {
-        if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'ead_artist') return;
+        if (!is_admin() || !$query->is_main_query() || $query->get('post_type') !== 'artpulse_artist') return;
         if (isset($_GET['artist_featured']) && $_GET['artist_featured'] !== '') {
             $query->set('meta_key', 'artist_featured');
             $query->set('meta_value', $_GET['artist_featured']);
