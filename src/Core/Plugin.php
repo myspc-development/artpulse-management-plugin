@@ -71,7 +71,11 @@ class Plugin
         \ArtPulse\Core\PostTypeRegistrar::register();
         flush_rewrite_rules();
 
-        $roles = ['administrator', 'editor'];
+        if (!get_role('artpulse_editor')) {
+            add_role('artpulse_editor', 'ArtPulse Editor', []);
+        }
+
+        $roles = ['administrator', 'editor', 'artpulse_editor'];
         $caps = [
             'edit_artpulse_org_review',
             'read_artpulse_org_review',
@@ -82,10 +86,24 @@ class Plugin
             'read_private_artpulse_org_reviews',
         ];
 
+
         foreach ($roles as $role_name) {
             if ($role = get_role($role_name)) {
                 foreach ($caps as $cap) {
                     $role->add_cap($cap);
+                }
+            }
+        }
+
+        $post_types = ['artpulse_event', 'artpulse_artist', 'artpulse_artwork'];
+        $assign_roles = ['administrator', 'artpulse_editor'];
+        foreach ($post_types as $type) {
+            $type_caps = \ArtPulse\Core\PostTypeRegistrar::generate_caps($type);
+            foreach ($assign_roles as $role_name) {
+                if ($role = get_role($role_name)) {
+                    foreach ($type_caps as $cap) {
+                        $role->add_cap($cap);
+                    }
                 }
             }
         }
@@ -99,6 +117,7 @@ class Plugin
     {
         flush_rewrite_rules();
         wp_clear_scheduled_hook('ap_daily_expiry_check');
+        remove_role('artpulse_editor');
     }
 
     public function register_core_modules()
